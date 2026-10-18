@@ -13,7 +13,7 @@
  *   7. --custom-rules <file.json> 自定义规则（检查某些文件必须/不能存在）
  *   8. --ci 门禁：有严重问题返回退出码 1，供定时任务判断
  *
- * 用法：node project-audit.cjs --root <dir> [--output dir] [--fix items] [--confirm] [--custom-rules f.json] [--ci]
+ * 用法：node project-audit.cjs --root <项目目录> [--output dir] [--fix items] [--confirm] [--custom-rules f.json] [--ci]
  */
 const fs = require('fs');
 const path = require('path');
@@ -27,7 +27,9 @@ const OUT_BASE = get('--output', path.join(ROOT, 'audits'));
 const RULE_PACKS = (get('--rules', 'core,security,docs,compliance,deep')).split(',');
 const FIX_ITEMS = args.includes('--fix') ? (get('--fix', '') || '').split(',').filter(Boolean) : [];
 const CONFIRM = args.includes('--confirm');
-const TODAY = new Date().toISOString().slice(0, 10);
+/* 用本地日期做报告目录名（toISOString 是 UTC，东八区早上跑会差一天） */
+const TODAY = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const NULL_DEV = process.platform === 'win32' ? '2>nul' : '2>/dev/null';
 
 /* ---------- 工具函数 ---------- */
 function sh(cmd, dir, timeout = 5000) {
@@ -182,7 +184,7 @@ function analyzeGitQuality(dir) {
   // AGENTS.md 更新频率（如果存在且有 git）
   let agentsUpdates = 0;
   if (fs.existsSync(path.join(dir, 'AGENTS.md'))) {
-    agentsUpdates = parseInt(sh('git log --oneline -- AGENTS.md | wc -l', dir)) || 0;
+    agentsUpdates = sh('git log --oneline -- AGENTS.md', dir).split('\n').filter(Boolean).length;
   }
 
   const vagueRatio = vagueMsgs / commits.length;
@@ -236,7 +238,7 @@ function analyzeDependencies(dir, type) {
   // 已知漏洞检查（npm audit 只认 package-lock.json；pnpm/yarn 锁文件的项目跳过）
   let vuln = null;
   if (fs.existsSync(path.join(dir, 'package-lock.json'))) {
-    const out = shKeepOutput('npm audit --json 2>nul', dir, 15000);
+    const out = shKeepOutput(`npm audit --json ${NULL_DEV}`, dir, 15000);
     if (out) {
       try {
         const audit = JSON.parse(out);
@@ -381,11 +383,12 @@ function deepSecretScan(dir) {
   };
   scanDir(dir, 0);
 
-  // 检查 .env 文件是否被 git 跟踪（如果有 git）
+  // 检查 .env 文件是否被 git 跟踪（如果有 git）——在 JS 里过滤，不依赖 grep
   if (fs.existsSync(path.join(dir, '.git'))) {
-    const envTracked = sh('git ls-files | grep -E "^\\.env(\\.|$)" | grep -v ".env.example"', dir);
+    const envTracked = sh('git ls-files', dir).split('\n')
+      .find(f => /^\.env(\.|$)/.test(f) && !f.includes('.env.example'));
     if (envTracked) {
-      issues.push({ file: envTracked.split('\n')[0], snippet: '敏感文件被 git 跟踪' });
+      issues.push({ file: envTracked, snippet: '敏感文件被 git 跟踪' });
     }
   }
 

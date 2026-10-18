@@ -62,10 +62,10 @@ git clone https://github.com/israelberne/pulse.git ~/.agents/skills/pulse
 
 ## 试一下
 
-仓库里带了一对演示项目（`demo/`）：一个缺乏约束的旧项目、一个守规矩的小项目。
+仓库里带了一对演示项目（`demo/`）：一个缺乏约束的旧项目、一个守规矩的小项目。[点这里看现成的示例报告](demo/example-report/index.html)，或自己跑一遍：
 
 ```bash
-node tools/project-audit.cjs --root demo --output demo/audits
+node tools/project-audit.cjs --root demo
 ```
 
 ## 为什么报告要说人话

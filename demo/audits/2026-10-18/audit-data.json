@@ -1,0 +1,192 @@
+[
+  {
+    "name": "legacy-app",
+    "type": "node-lib",
+    "criticalCount": 2,
+    "warningCount": 5,
+    "infoCount": 3,
+    "findings": [
+      {
+        "id": "git",
+        "severity": "critical",
+        "name": "版本控制",
+        "level": "surface",
+        "detail": "",
+        "impact": "无法回滚错误改动，无法查看修改历史，多轮迭代中无法定位引入问题的提交。",
+        "fix": "git init + 首次全量 commit"
+      },
+      {
+        "id": "spec",
+        "severity": "warning",
+        "name": "需求文档",
+        "level": "surface",
+        "detail": "",
+        "impact": "需求未对齐即动工，导致推倒重来或后期范围失控。",
+        "fix": "创建一页 spec"
+      },
+      {
+        "id": "tests",
+        "severity": "warning",
+        "name": "自动化验证",
+        "level": "surface",
+        "detail": "未检测到",
+        "impact": "改动后没有自动检查，原有功能被改坏也不会被发现；测试全绿不等于真机能用。",
+        "fix": "至少添加关键路径的自动化验证"
+      },
+      {
+        "id": "design",
+        "severity": "warning",
+        "name": "设计文档",
+        "level": "surface",
+        "detail": "",
+        "impact": "架构决策无记录，后续维护者不知道为什么这样设计。",
+        "fix": "创建 AGENTS.md 或架构决策记录"
+      },
+      {
+        "id": "gitignore",
+        "severity": "critical",
+        "name": "忽略规则",
+        "level": "surface",
+        "detail": "",
+        "impact": "构建产物、密钥文件被纳入版本控制。",
+        "fix": "创建 .gitignore"
+      },
+      {
+        "id": "readme",
+        "severity": "info",
+        "name": "项目说明",
+        "level": "surface",
+        "detail": "",
+        "impact": "打开项目不知道做什么、怎么跑。",
+        "fix": "创建 README.md"
+      },
+      {
+        "id": "agents",
+        "severity": "warning",
+        "name": "协作规范",
+        "level": "surface",
+        "detail": "",
+        "impact": "每次会话重新建立规则，行为不一致。",
+        "fix": "创建 AGENTS.md"
+      },
+      {
+        "id": "retro",
+        "severity": "info",
+        "name": "复盘记录",
+        "level": "surface",
+        "detail": "",
+        "impact": "踩过的坑不沉淀，下次重新踩。",
+        "fix": "创建开发复盘.md"
+      },
+      {
+        "id": "license",
+        "severity": "info",
+        "name": "开源许可",
+        "level": "surface",
+        "detail": "",
+        "impact": "无许可证 = 默认保留所有权利。",
+        "fix": "添加 LICENSE"
+      },
+      {
+        "id": "dep-lockfile",
+        "severity": "warning",
+        "name": "依赖健康",
+        "level": "deep",
+        "detail": "依赖 3 个 · 无版本锁定文件 · 宽松版本号 2 个",
+        "impact": "没有版本锁定文件，每次安装可能装到不同版本，今天能跑明天就坏；已知漏洞说明正带着安全问题在运行。",
+        "fix": "生成版本锁定文件（在项目里执行一次 npm install 或 pnpm install 即可）；有已知漏洞的，按 npm audit 的提示升级对应依赖"
+      }
+    ],
+    "deepInfo": [
+      {
+        "id": "spec-quality",
+        "name": "Spec 完整性",
+        "level": "deep",
+        "detail": "没有需求文档"
+      },
+      {
+        "id": "activity",
+        "name": "维护活跃度",
+        "level": "deep",
+        "detail": "无git"
+      },
+      {
+        "id": "code-complexity",
+        "name": "代码体量",
+        "level": "deep",
+        "detail": "最大的文件 src\\app.js（623 行）· 超 500 行的文件 1 个 · 未完成的待办标记 25 处 · 共扫 1 个代码文件"
+      }
+    ]
+  },
+  {
+    "name": "well-kept",
+    "type": "node-lib",
+    "criticalCount": 1,
+    "warningCount": 1,
+    "infoCount": 2,
+    "findings": [
+      {
+        "id": "git",
+        "severity": "critical",
+        "name": "版本控制",
+        "level": "surface",
+        "detail": "",
+        "impact": "无法回滚错误改动，无法查看修改历史，多轮迭代中无法定位引入问题的提交。",
+        "fix": "git init + 首次全量 commit"
+      },
+      {
+        "id": "retro",
+        "severity": "info",
+        "name": "复盘记录",
+        "level": "surface",
+        "detail": "",
+        "impact": "踩过的坑不沉淀，下次重新踩。",
+        "fix": "创建开发复盘.md"
+      },
+      {
+        "id": "license",
+        "severity": "info",
+        "name": "开源许可",
+        "level": "surface",
+        "detail": "",
+        "impact": "无许可证 = 默认保留所有权利。",
+        "fix": "添加 LICENSE"
+      },
+      {
+        "id": "dep-lockfile",
+        "severity": "warning",
+        "name": "依赖健康",
+        "level": "deep",
+        "detail": "依赖 0 个 · 无版本锁定文件 · 宽松版本号 0 个",
+        "impact": "没有版本锁定文件，每次安装可能装到不同版本，今天能跑明天就坏；已知漏洞说明正带着安全问题在运行。",
+        "fix": "生成版本锁定文件（在项目里执行一次 npm install 或 pnpm install 即可）；有已知漏洞的，按 npm audit 的提示升级对应依赖"
+      }
+    ],
+    "deepInfo": [
+      {
+        "id": "spec-quality",
+        "name": "Spec 完整性",
+        "level": "deep",
+        "detail": "包含：范围 / 不做什么 / 验收 / 失败条款 → 好"
+      },
+      {
+        "id": "test-quality",
+        "name": "测试有效性",
+        "level": "deep",
+        "detail": "抽查1个测试文件，1个会校验结果对错"
+      },
+      {
+        "id": "activity",
+        "name": "维护活跃度",
+        "level": "deep",
+        "detail": "无git"
+      },
+      {
+        "id": "code-complexity",
+        "name": "代码体量",
+        "level": "deep",
+        "detail": "最大的文件 tools\\verify.js（7 行）· 超 500 行的文件 0 个 · 未完成的待办标记 0 处 · 共扫 1 个代码文件"
+      }
+    ]
+  }
+]

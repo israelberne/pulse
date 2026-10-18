@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工程纪律审计 · 2026-10-18</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f3ef;color:#1a1d21;line-height:1.7;padding:40px 20px}
+  .container{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin-bottom:4px}
+  .meta{color:#6b7078;font-size:13px;margin-bottom:24px}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .stat{background:#fff;border:1px solid #ddd;border-radius:10px;padding:18px;text-align:center}
+  .stat .num{font-size:36px;font-weight:800}
+  .stat .label{font-size:13px;color:#6b7078}
+  .stat.critical .num{color:#c0392b} .stat.warning .num{color:#d4a017}
+  .stat.info .num{color:#3498db} .stat.projects .num{color:#1a1d21}
+  .trend-banner{background:#fff;border:1px solid #ddd;border-left:3px solid #3498db;border-radius:0 10px 10px 0;padding:12px 18px;margin-bottom:24px;font-size:14px;color:#3d4248}
+  h2{font-size:20px;margin:32px 0 14px;padding-top:16px;border-top:1px solid #ddd}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #ddd;border-radius:8px;overflow:hidden}
+  th{text-align:left;font-size:12px;color:#6b7078;border-bottom:2px solid #ddd;padding:10px 14px;letter-spacing:.06em}
+  td{padding:10px 14px;border-bottom:1px solid #eee;font-size:14px}
+  tr:hover td{background:#fafafa}
+  .sev{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700}
+  .sev.critical{color:#c0392b;background:#fdf0ef} .sev.warning{color:#d4a017;background:#fdf8e7}
+  .sev.info{color:#3498db;background:#ebf5fb} .sev.pass{color:#27ae60;background:#eafaf1}
+  .tag{display:inline-block;font-size:12px;color:#6b7078;background:#f0ede8;border:1px solid #ddd;border-radius:4px;padding:1px 7px;margin:2px 4px 2px 0}
+  .ptype{font-size:11px;color:#8a929c;margin-left:6px;border:1px solid #ddd;border-radius:4px;padding:0 5px}
+  .trend{font-size:13px;font-weight:600;white-space:nowrap}
+  .trend-new{font-size:11px;color:#c0392b;background:#fdf0ef;border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:700}
+  .trend-fixed{font-size:11px;color:#27ae60;background:#eafaf1;border-radius:4px;padding:1px 6px;margin-left:4px;font-weight:700}
+  .card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:20px 22px;margin:14px 0}
+  .card h3{font-size:17px;margin-bottom:12px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+  .finding{padding:10px 14px;margin:8px 0;border-radius:6px;border-left:3px solid}
+  .finding.sev-critical{border-color:#c0392b;background:#fdf0ef}
+  .finding.sev-warning{border-color:#d4a017;background:#fdf8e7}
+  .finding.sev-info{border-color:#3498db;background:#ebf5fb}
+  .finding-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+  .sev-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;color:#fff}
+  .sev-badge.critical{background:#c0392b} .sev-badge.warning{background:#d4a017} .sev-badge.info{background:#3498db}
+  .deep-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;color:#8e44ad;background:#f4ecf7}
+  .new-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;color:#c0392b;background:#fff;border:1px solid #c0392b}
+  .detail{font-size:13px;color:#5a6470;margin:2px 0;font-style:italic}
+  .impact,.fix{font-size:13.5px;color:#3d4248;margin:3px 0}
+  .impact strong,.fix strong{color:#1a1d21}
+  .deep-info{font-size:13px;color:#5a6470;margin:4px 0}
+  details{margin-top:10px}
+  summary{cursor:pointer;color:#6b7078;font-size:13px}
+  .case-study{background:#fff;border:1px solid #ddd;border-left:3px solid #3498db;border-radius:0 10px 10px 0;padding:14px 18px;margin:10px 0;font-size:14px}
+  .case-study .title{font-weight:700;margin-bottom:4px}
+  .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+  .toolbar .lbl{font-size:13px;color:#6b7078}
+  .fbtn{font-size:13px;padding:4px 14px;border-radius:999px;border:1px solid #ddd;background:#fff;color:#3d4248;cursor:pointer}
+  .fbtn:hover{border-color:#9aa2ac}
+  .fbtn.on{background:#1a1d21;color:#fff;border-color:#1a1d21}
+  .toolbar .sep{width:1px;height:18px;background:#ddd;margin:0 6px}
+  @media print{body{padding:10px}.container{max-width:100%}.toolbar{display:none}}
+  @media(max-width:768px){.summary{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>工程纪律审计报告</h1>
+  <p class="meta">范围：demo · 2 个项目 · 检查维度：核心、安全、文档、合规、深度 · 2026-10-18</p>
+
+  <div class="summary">
+    <div class="stat critical"><div class="num">3</div><div class="label">严重</div></div>
+    <div class="stat warning"><div class="num">6</div><div class="label">警告</div></div>
+    <div class="stat info"><div class="num">5</div><div class="label">建议</div></div>
+    <div class="stat projects"><div class="num">2</div><div class="label">项目</div></div>
+  </div>
+
+  
+
+  <h2>总览</h2>
+  <div class="toolbar">
+    <span class="lbl">筛选</span>
+    <button class="fbtn on" data-f="all">全部</button>
+    <button class="fbtn" data-f="critical">有严重</button>
+    <button class="fbtn" data-f="warning">有警告</button>
+    <button class="fbtn" data-f="info">仅建议</button>
+    <span class="sep"></span>
+    <span class="lbl">排序</span>
+    <button class="fbtn on" data-s="sev">按严重度</button>
+    <button class="fbtn" data-s="name">按名称</button>
+  </div>
+  <table>
+    <thead><tr><th>项目</th><th style="text-align:center;width:50px">严重</th><th style="text-align:center;width:50px">警告</th><th style="text-align:center;width:50px">建议</th><th style="width:96px">趋势</th><th>缺失项</th></tr></thead>
+    <tbody>
+    <tr data-sev="critical" data-c="2" data-w="5" data-i="3" data-name="legacy-app">
+      <td><strong>legacy-app</strong><span class="ptype">工具库</span></td>
+      <td style="text-align:center"><span class="sev critical">2</span></td>
+      <td style="text-align:center"><span class="sev warning">5</span></td>
+      <td style="text-align:center"><span class="sev info">3</span></td>
+      <td></td>
+      <td><span class="tag">版本控制</span><span class="tag">需求文档</span><span class="tag">自动化验证</span><span class="tag">设计文档</span><span class="tag">+6</span></td>
+    </tr>
+    <tr data-sev="critical" data-c="1" data-w="1" data-i="2" data-name="well-kept">
+      <td><strong>well-kept</strong><span class="ptype">工具库</span></td>
+      <td style="text-align:center"><span class="sev critical">1</span></td>
+      <td style="text-align:center"><span class="sev warning">1</span></td>
+      <td style="text-align:center"><span class="sev info">2</span></td>
+      <td></td>
+      <td><span class="tag">版本控制</span><span class="tag">复盘记录</span><span class="tag">开源许可</span><span class="tag">依赖健康</span></td>
+    </tr></tbody>
+  </table>
+
+  <h2>详细发现（含深度分析）</h2>
+  <div class="toolbar">
+    <span class="lbl">筛选</span>
+    <button class="fbtn on" data-f="all">全部</button>
+    <button class="fbtn" data-f="critical">严重</button>
+    <button class="fbtn" data-f="warning">警告</button>
+    <button class="fbtn" data-f="deep">深度发现</button>
+  </div>
+  <div id="cards">
+    <div class="card" id="proj-legacy-app" data-sevs="critical,warning,info" data-deep="1" data-c="2" data-w="5" data-i="3" data-name="legacy-app">
+      <h3>
+        legacy-app <span class="ptype">工具库</span>
+        
+        
+        
+      </h3>
+      
+        <div class="finding sev-critical">
+          <div class="finding-head">
+            <span class="sev-badge critical">严重</span>
+            <strong>版本控制</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：无法回滚错误改动，无法查看修改历史，多轮迭代中无法定位引入问题的提交。</p>
+          <p class="fix"><strong>建议</strong>：git init + 首次全量 commit</p>
+        </div>
+        <div class="finding sev-warning">
+          <div class="finding-head">
+            <span class="sev-badge warning">警告</span>
+            <strong>需求文档</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：需求未对齐即动工，导致推倒重来或后期范围失控。</p>
+          <p class="fix"><strong>建议</strong>：创建一页 spec</p>
+        </div>
+        <div class="finding sev-warning">
+          <div class="finding-head">
+            <span class="sev-badge warning">警告</span>
+            <strong>自动化验证</strong>
+            
+            
+          </div>
+          <p class="detail">未检测到</p>
+          <p class="impact"><strong>影响</strong>：改动后没有自动检查，原有功能被改坏也不会被发现；测试全绿不等于真机能用。</p>
+          <p class="fix"><strong>建议</strong>：至少添加关键路径的自动化验证</p>
+        </div>
+        <div class="finding sev-warning">
+          <div class="finding-head">
+            <span class="sev-badge warning">警告</span>
+            <strong>设计文档</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：架构决策无记录，后续维护者不知道为什么这样设计。</p>
+          <p class="fix"><strong>建议</strong>：创建 AGENTS.md 或架构决策记录</p>
+        </div>
+        <div class="finding sev-critical">
+          <div class="finding-head">
+            <span class="sev-badge critical">严重</span>
+            <strong>忽略规则</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：构建产物、密钥文件被纳入版本控制。</p>
+          <p class="fix"><strong>建议</strong>：创建 .gitignore</p>
+        </div>
+        <div class="finding sev-info">
+          <div class="finding-head">
+            <span class="sev-badge info">建议</span>
+            <strong>项目说明</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：打开项目不知道做什么、怎么跑。</p>
+          <p class="fix"><strong>建议</strong>：创建 README.md</p>
+        </div>
+        <div class="finding sev-warning">
+          <div class="finding-head">
+            <span class="sev-badge warning">警告</span>
+            <strong>协作规范</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：每次会话重新建立规则，行为不一致。</p>
+          <p class="fix"><strong>建议</strong>：创建 AGENTS.md</p>
+        </div>
+        <div class="finding sev-info">
+          <div class="finding-head">
+            <span class="sev-badge info">建议</span>
+            <strong>复盘记录</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：踩过的坑不沉淀，下次重新踩。</p>
+          <p class="fix"><strong>建议</strong>：创建开发复盘.md</p>
+        </div>
+        <div class="finding sev-info">
+          <div class="finding-head">
+            <span class="sev-badge info">建议</span>
+            <strong>开源许可</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：无许可证 = 默认保留所有权利。</p>
+          <p class="fix"><strong>建议</strong>：添加 LICENSE</p>
+        </div>
+        <div class="finding sev-warning">
+          <div class="finding-head">
+            <span class="sev-badge warning">警告</span>
+            <strong>依赖健康</strong>
+            <span class="deep-badge">深度</span>
+            
+          </div>
+          <p class="detail">依赖 3 个 · 无版本锁定文件 · 宽松版本号 2 个</p>
+          <p class="impact"><strong>影响</strong>：没有版本锁定文件，每次安装可能装到不同版本，今天能跑明天就坏；已知漏洞说明正带着安全问题在运行。</p>
+          <p class="fix"><strong>建议</strong>：生成版本锁定文件（在项目里执行一次 npm install 或 pnpm install 即可）；有已知漏洞的，按 npm audit 的提示升级对应依赖</p>
+        </div>
+      
+        <details><summary>深度分析数据</summary>
+          <p class="deep-info"><strong>Spec 完整性</strong>：没有需求文档</p><p class="deep-info"><strong>维护活跃度</strong>：无git</p><p class="deep-info"><strong>代码体量</strong>：最大的文件 src\app.js（623 行）· 超 500 行的文件 1 个 · 未完成的待办标记 25 处 · 共扫 1 个代码文件</p>
+        </details>
+    </div>
+    <div class="card" id="proj-well-kept" data-sevs="critical,info,warning" data-deep="1" data-c="1" data-w="1" data-i="2" data-name="well-kept">
+      <h3>
+        well-kept <span class="ptype">工具库</span>
+        
+        
+        
+      </h3>
+      
+        <div class="finding sev-critical">
+          <div class="finding-head">
+            <span class="sev-badge critical">严重</span>
+            <strong>版本控制</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：无法回滚错误改动，无法查看修改历史，多轮迭代中无法定位引入问题的提交。</p>
+          <p class="fix"><strong>建议</strong>：git init + 首次全量 commit</p>
+        </div>
+        <div class="finding sev-info">
+          <div class="finding-head">
+            <span class="sev-badge info">建议</span>
+            <strong>复盘记录</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：踩过的坑不沉淀，下次重新踩。</p>
+          <p class="fix"><strong>建议</strong>：创建开发复盘.md</p>
+        </div>
+        <div class="finding sev-info">
+          <div class="finding-head">
+            <span class="sev-badge info">建议</span>
+            <strong>开源许可</strong>
+            
+            
+          </div>
+          
+          <p class="impact"><strong>影响</strong>：无许可证 = 默认保留所有权利。</p>
+          <p class="fix"><strong>建议</strong>：添加 LICENSE</p>
+        </div>
+        <div class="finding sev-warning">
+          <div class="finding-head">
+            <span class="sev-badge warning">警告</span>
+            <strong>依赖健康</strong>
+            <span class="deep-badge">深度</span>
+            
+          </div>
+          <p class="detail">依赖 0 个 · 无版本锁定文件 · 宽松版本号 0 个</p>
+          <p class="impact"><strong>影响</strong>：没有版本锁定文件，每次安装可能装到不同版本，今天能跑明天就坏；已知漏洞说明正带着安全问题在运行。</p>
+          <p class="fix"><strong>建议</strong>：生成版本锁定文件（在项目里执行一次 npm install 或 pnpm install 即可）；有已知漏洞的，按 npm audit 的提示升级对应依赖</p>
+        </div>
+      
+        <details><summary>深度分析数据</summary>
+          <p class="deep-info"><strong>Spec 完整性</strong>：包含：范围 / 不做什么 / 验收 / 失败条款 → 好</p><p class="deep-info"><strong>测试有效性</strong>：抽查1个测试文件，1个会校验结果对错</p><p class="deep-info"><strong>维护活跃度</strong>：无git</p><p class="deep-info"><strong>代码体量</strong>：最大的文件 tools\verify.js（7 行）· 超 500 行的文件 0 个 · 未完成的待办标记 0 处 · 共扫 1 个代码文件</p>
+        </details>
+    </div></div>
+
+  <h2>典型影响案例</h2>
+  <div class="case-study"><div class="title">无版本控制的代价</div>某项目七轮视觉迭代后需回退到第三版，但没有提交记录，只能靠截图对比还原。加回滚点后，同类问题通过对比两次提交的改动，30 秒内定位。</div>
+  <div class="case-study"><div class="title">测试全绿但真机白屏</div>某项目 109 个单测全部通过，浏览器打开整页白屏——组件代码在某个条件下提前结束，后续初始化没执行，而单测恰好没覆盖这条路径。此后真实浏览器走查成为完成定义的一部分。</div>
+  <div class="case-study"><div class="title">同一时区问题出现四次</div>UTC 与本地时间混用导致"晚上 8 点后今天变明天"。同一项目修过后，下一个项目原样复现——根源是日期工具没有收口。</div>
+  <div class="case-study"><div class="title">密钥进 git 的不可逆性</div>硬编码的密钥一旦提交，即使后续删除，历史中仍可恢复。等于永久泄露。唯一补救是立刻吊销换新。预防成本为零，补救成本极高。</div>
+  <div class="case-study"><div class="title">规范从不更新的退化</div>某项目的协作规范创建后零更新，规则从未随实际教训增长，最终形同虚设——AI 行为与规范完全脱节。</div>
+</div>
+<script>
+(function(){
+  var tbody = document.querySelector('table tbody');
+  if (!tbody) return;
+  var rows = [].slice.call(tbody.children);
+  var cards = [].slice.call(document.querySelectorAll('#cards .card'));
+  var curF = 'all', curS = 'sev';
+  function score(el){ return (+el.getAttribute('data-c')||0)*100 + (+el.getAttribute('data-w')||0)*10 + (+el.getAttribute('data-i')||0); }
+  function bySev(a,b){ return score(b) - score(a); }
+  function byName(a,b){ return (a.getAttribute('data-name')||'').localeCompare(b.getAttribute('data-name')||''); }
+  function apply(){
+    rows.forEach(function(r){
+      r.style.display = (curF === 'all' || r.getAttribute('data-sev') === curF) ? '' : 'none';
+    });
+    cards.forEach(function(c){
+      var sevs = (c.getAttribute('data-sevs') || '').split(',');
+      var show = curF === 'all' || (curF === 'deep' ? c.getAttribute('data-deep') === '1' : sevs.indexOf(curF) > -1);
+      c.style.display = show ? '' : 'none';
+    });
+    var cmp = curS === 'sev' ? bySev : byName;
+    rows.sort(cmp).forEach(function(r){ tbody.appendChild(r); });
+    cards.slice().sort(cmp).forEach(function(c){ c.parentNode.appendChild(c); });
+  }
+  document.querySelectorAll('.fbtn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var g = btn.parentNode.querySelectorAll('.fbtn');
+      if (btn.hasAttribute('data-f')) { curF = btn.getAttribute('data-f'); g.forEach(function(b){ if (b.hasAttribute('data-f')) b.classList.remove('on'); }); }
+      else { curS = btn.getAttribute('data-s'); g.forEach(function(b){ if (b.hasAttribute('data-s')) b.classList.remove('on'); }); }
+      btn.classList.add('on');
+      apply();
+    });
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

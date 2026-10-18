@@ -11,11 +11,17 @@ description: PULSE (项目脉搏) — engineering discipline audit for AI-assist
 
 ## 安装
 
+不同工具的个人技能目录不一样，按你用的工具选：
+
 ```bash
-git clone https://github.com/israelberne/pulse.git ~/.agents/skills/pulse
+# Claude Code
+git clone https://github.com/israelberne/pulse.git ~/.claude/skills/pulse
+
+# ZCode
+git clone https://github.com/israelberne/pulse.git ~/.zcode/skills/pulse
 ```
 
-（ZCode 用户放到 `~/.zcode/skills/pulse`；也可以 clone 到任意位置后手动调用脚本。）
+也可以 clone 到任意位置当命令行工具直接用（见下）。装好后对 AI 说"用 pulse 审计一下我的项目"。
 
 ## 何时用
 

@@ -1,4 +1,4 @@
-/* 生成演示用的两个假项目（跑一次即可，产物入库，本脚本自删不必要——保留供他人重造演示） */
+/* 重建演示用的两个假项目：在 demo/ 目录下运行 node _gen.cjs，会生成 legacy-app 和 well-kept */
 const fs = require('fs');
 const path = require('path');
 const w = (p, c) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, c); };

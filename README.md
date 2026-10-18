@@ -34,13 +34,26 @@ node pulse/tools/project-audit.cjs --root <你的项目目录>
 
 报告生成在 `<你的项目目录>/audits/<日期>/index.html`，浏览器直接打开（file:// 即可，无任何外部依赖）。支持按严重级别筛选、按严重度或名称排序。
 
-### 作为 AI 技能安装（Claude Code / ZCode）
+### 作为 AI 技能安装
+
+不同工具的技能目录不一样，按你用的选：
 
 ```bash
-git clone https://github.com/israelberne/pulse.git ~/.agents/skills/pulse
+# Claude Code
+git clone https://github.com/israelberne/pulse.git ~/.claude/skills/pulse
+
+# ZCode
+git clone https://github.com/israelberne/pulse.git ~/.zcode/skills/pulse
 ```
 
 之后对 AI 说"用 pulse 审计一下我的项目"即可，技能内含完整使用说明。
+
+## 适用范围（先读这个，避免预期错位）
+
+- **项目识别**：Node（含 monorepo / 网页应用 / 服务 / 工具库）、Python、Go、Rust、纯静态站。目录里有 `package.json` / `requirements.txt` / `pyproject.toml` / `go.mod` / `Cargo.toml` / `index.html` 等标志之一才算项目；只有 `src/`、`tools/` 这类子目录的，还得里面有代码文件才认。
+- **深度检查的覆盖差异**：依赖漏洞目前只查 npm（需 package-lock.json）和 Python（requirements.txt 钉死）；其他语言做表面检查 + 提交质量等通用深度检查。
+- **报告语言**：中文。
+- **规则立场**：为"AI 辅助的个人/小团队项目"设计（十条守则：版本控制、需求文档、评测、回滚点……），大团队的完整流程规范未必全部适用。
 
 ## 参数
 
@@ -62,7 +75,7 @@ git clone https://github.com/israelberne/pulse.git ~/.agents/skills/pulse
 
 ## 试一下
 
-仓库里带了一对演示项目（`demo/`）：一个缺乏约束的旧项目、一个守规矩的小项目。[点这里看现成的示例报告](demo/example-report/index.html)，或自己跑一遍：
+仓库里带了一对演示项目（`demo/`）：一个缺乏约束的旧项目、一个守规矩的小项目。[点这里看现成的示例报告](demo/example-report/report.html)，或自己跑一遍：
 
 ```bash
 node tools/project-audit.cjs --root demo

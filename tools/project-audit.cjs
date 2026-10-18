@@ -31,6 +31,11 @@ const CONFIRM = args.includes('--confirm');
 const TODAY = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 const NULL_DEV = process.platform === 'win32' ? '2>nul' : '2>/dev/null';
 
+if (!fs.existsSync(ROOT)) {
+  console.error(`--root 指向的目录不存在：${ROOT}`);
+  process.exit(2);
+}
+
 /* ---------- 工具函数 ---------- */
 function sh(cmd, dir, timeout = 5000) {
   try {
@@ -62,6 +67,8 @@ function detectProjectType(dir) {
   if (pkg?.scripts?.start || pkg?.main?.includes('server')) return 'node-server';
   if (pkg) return 'node-lib';
   if (hasPy) return 'python';
+  if (fs.existsSync(path.join(dir, 'go.mod'))) return 'go';
+  if (fs.existsSync(path.join(dir, 'Cargo.toml'))) return 'rust';
   if (hasStatic) return 'static';
   return 'unknown';
 }
@@ -165,7 +172,7 @@ function analyzeGitQuality(dir) {
   const messages = commits.map(c => c.replace(/^[a-f0-9]+\s+/, ''));
   const avgLen = messages.reduce((a, m) => a + m.length, 0) / messages.length;
   const shortMsgs = messages.filter(m => m.length < 10).length;
-  const vagueMsgs = messages.filter(m => /^(fix|update|change|test|wip|tmp)\.?$/i.test(m.trim())).length;
+  const vagueMsgs = messages.filter(m => /^(fix|update|change|test|wip|tmp|修复|更新|修改|调整|完善|调试|临时|杂项)[.。:：]?\s*$/i.test(m.trim())).length;
 
   // 原子性：每次提交改了多少文件
   let filesPerCommit = [];
@@ -266,7 +273,7 @@ function analyzeDependencies(dir, type) {
 /* ---------- 代码体量与待办标记分析 ---------- */
 function analyzeComplexity(dir) {
   const codeExts = ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.py', '.jsx'];
-  const skipDirs = ['node_modules', '.git', '__pycache__', '.cache', 'coverage', '.next', 'research', 'release', 'out', 'bundle', 'vendor'];
+  const skipDirs = ['node_modules', '.git', '__pycache__', '.cache', 'coverage', '.next', 'release', 'out', 'bundle', 'vendor'];
   const isSkipped = n => skipDirs.includes(n) || n.startsWith('dist') || n.startsWith('build');
   let largestFile = '';
   let largestLines = 0;
@@ -449,13 +456,32 @@ function computeTrend(current, previous) {
 /* ---------- 项目扫描主逻辑 ---------- */
 function findProjects(root) {
   const SKIP = ['node_modules', '.git', 'audits', '__pycache__', 'dist', 'build', '.zcode', '.claude', 'repos'];
+  const MARKER_FILES = ['package.json', 'requirements.txt', 'pyproject.toml', 'setup.py', 'go.mod', 'Cargo.toml',
+    'pom.xml', 'build.gradle', 'composer.json', 'Gemfile', 'CMakeLists.txt', 'Makefile', 'deno.json', 'index.html'];
+  const MARKER_DIRS = ['src', 'js', 'tools', 'apps', 'packages', 'app', 'web', 'server', 'lib'];
+  const CODE_EXTS = ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.go', '.rs', '.java', '.rb', '.php', '.vue', '.svelte'];
+  const hasCode = d => { try { return fs.readdirSync(d).some(f => CODE_EXTS.includes(path.extname(f))); } catch (e) { return false; } };
+  // 往下看两层：不少项目根目录只有文档，代码在 app/src 这类子目录里
+  const hasCodeDeep = d => {
+    try {
+      for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+        if (e.isDirectory()) { if (hasCode(path.join(d, e.name))) return true; }
+        else if (CODE_EXTS.includes(path.extname(e.name))) return true;
+      }
+    } catch (e2) {}
+    return false;
+  };
   return fs.readdirSync(root, { withFileTypes: true })
     .filter(d => d.isDirectory() && !SKIP.includes(d.name) && !d.name.startsWith('.'))
     .map(d => d.name)
     .filter(name => {
       const dir = path.join(root, name);
-      return ['package.json', 'requirements.txt', 'pyproject.toml', 'index.html', 'src', 'js', 'tools', 'apps', 'packages']
-        .some(f => fs.existsSync(path.join(dir, f)));
+      if (MARKER_FILES.some(f => fs.existsSync(path.join(dir, f)))) return true;
+      // 只有目录标志时，还得里面有代码文件，避免把普通文件夹当项目
+      return MARKER_DIRS.some(md => {
+        const sub = path.join(dir, md);
+        return fs.existsSync(sub) && (hasCodeDeep(dir) || hasCodeDeep(sub));
+      });
     })
     .sort();
 }
@@ -514,7 +540,7 @@ const depFix = p => p.deps?.manager === 'pip'
   : '生成版本锁定文件（在项目里执行一次 npm install 或 pnpm install 即可）；有已知漏洞的，按 npm audit 的提示升级对应依赖';
 
 /* 报告用词统一为中文 */
-const TYPE_LABELS = { monorepo: '多包项目', 'web-app': '网页应用', 'node-server': '网站服务', 'node-lib': '工具库', python: 'Python', static: '纯静态', unknown: '未识别' };
+const TYPE_LABELS = { monorepo: '多包项目', 'web-app': '网页应用', 'node-server': '网站服务', 'node-lib': '工具库', python: 'Python', go: 'Go 项目', rust: 'Rust 项目', static: '纯静态', unknown: '未识别' };
 const QUALITY_LABELS = { good: '好', fair: '一般', poor: '差', shallow: '太浅' };
 const PACK_LABELS = { core: '核心', security: '安全', docs: '文档', compliance: '合规', deep: '深度', custom: '自定义' };
 
@@ -942,7 +968,13 @@ if (CUSTOM_FILE) {
 
 /* ---------- 主流程 ---------- */
 const packs = RULE_PACKS.filter(Boolean);
+const KNOWN_PACKS = ['core', 'security', 'docs', 'compliance', 'deep', 'custom'];
+const unknownPacks = packs.filter(p2 => !KNOWN_PACKS.includes(p2));
+if (unknownPacks.length) console.error(`忽略未知的规则包：${unknownPacks.join(', ')}（可用：${KNOWN_PACKS.join(', ')}）`);
 const results = audit(ROOT, packs);
+if (!results.length) {
+  console.error(`提示：在 ${ROOT} 下没找到可识别的项目（认 package.json / requirements.txt / go.mod / Cargo.toml / index.html 这些标志）。检查 --root 是否指对了。`);
+}
 
 // 时间维度
 const previous = loadPreviousAudit(OUT_BASE);
